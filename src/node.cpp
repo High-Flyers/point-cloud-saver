@@ -41,7 +41,8 @@ void callback(const PointCloud::ConstPtr &msg)
     {
         shouldUpdate = false;
         static uint32_t i = 0;
-        std::cout << "write... " << i++ << std::endl;
+        //std::cout << "write... " << i++ << std::endl;
+        ROS_INFO("write point pack: %i", i++);
         std::vector<pcl::PointXYZRGB, Eigen::aligned_allocator<pcl::PointXYZRGB>> cleanPointsVec;
         for(auto &pt : msg->points) {
             if(pt.z < MAX_DISTANCE) {
@@ -59,8 +60,8 @@ void callback(const PointCloud::ConstPtr &msg)
         uint8_t counter = 0;
         for(auto &pt : cleanCloud.points) {
             if(counter++ % 4 == 0)
-                //dataFile << pt.x << ' ' << pt.y << ' ' << pt.z << ' ' << (int)pt.r << ' ' << (int)pt.g << ' ' << (int)pt.b << '\n';
-                dataFile << pt.x << ' ' << pt.y << ' ' << pt.z << '\n';
+                dataFile << pt.x << ' ' << pt.y << ' ' << pt.z << ' ' << (int)pt.r << ' ' << (int)pt.g << ' ' << (int)pt.b << '\n';
+                //dataFile << pt.x << ' ' << pt.y << ' ' << pt.z << '\n';
         }
         dataFile.flush();
     }
@@ -71,7 +72,7 @@ void callbackTf(const tf::tfMessageConstPtr &msg)
     static geometry_msgs::TransformStamped prevTransform;
     for(auto &tf : msg->transforms)
     {
-        if(tf.header.frame_id == "odom") {
+        if(tf.header.frame_id == "t265_odom_frame") {
             
             double dist = std::sqrt(
                 std::pow(tf.transform.translation.x - prevTransform.transform.translation.x, 2.0f) + 
@@ -121,7 +122,7 @@ int main(int argc, char **argv)
     ros::Rate rate(50);
     tf::TransformListener listener;
     listener_ptr = &listener;
-    ros::Subscriber sub = nh.subscribe<PointCloud>("/camera/depth/points", 1, callback);
+    ros::Subscriber sub = nh.subscribe<PointCloud>("/d400/depth/color/points", 1, callback);
     ros::Subscriber subTf = nh.subscribe<tf::tfMessage>("/tf", 1, callbackTf);
     ros::spin();
 }
